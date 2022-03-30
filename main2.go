@@ -3,12 +3,16 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/glebarez/sqlite"
+	"gorm.io/gorm"
 )
 
 type Employee struct {
 	Id   int
 	Age  int
 	Namn string
+	City string
 }
 
 type EmployeeResult struct {
@@ -29,6 +33,33 @@ func main() {
 	allaEmployees = append(allaEmployees, Employee{Id: 1, Namn: "Stefan", Age: 25})
 	allaEmployees = append(allaEmployees, Employee{Id: 2, Namn: "Oliver", Age: 5})
 	allaEmployees = append(allaEmployees, Employee{Id: 3, Namn: "Josefine", Age: 12})
+
+	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	db.AutoMigrate(&Employee{})
+	// for _, employee := range allaEmployees {
+	// 	db.Create(&employee)
+	// 	//insert into Employee
+	// 	//reflection runtime ta reda på vilka fält som finns
+	// }
+
+	//Lista alla
+	ret := []Employee{}
+	db.Find(&ret, &Employee{})
+	for _, device := range ret {
+		fmt.Println(device.Namn)
+	}
+
+	ret1 := Employee{}
+	db.First(&ret1, "age=?", 12)
+
+	db.First(&ret1, 2)
+	ret1.City = "Test"
+	ret1.Age = 18
+	db.Model(&ret1).Updates(ret1)
 
 	// CHANNEL kanal för kommunikation
 	ch := make(chan EmployeeResult)
