@@ -5,15 +5,27 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
-func main() {
-	handleDeposits()
-	handleWithdrawals()
+func main111() {
+	fmt.Printf("Hej")
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go handleDeposits(&wg)
+	go handleWithdrawals(&wg)
+
+	wg.Wait()
+
 }
 
-func handleWithdrawals() {
+func handleWithdrawals(wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Println("Starting handlewithdrawals")
+
 	files, err := ioutil.ReadDir("withdrawals")
 	if err != nil {
 		log.Fatal(err)
@@ -34,7 +46,10 @@ func handleWithdrawals() {
 
 }
 
-func handleDeposits() {
+func handleDeposits(wg *sync.WaitGroup) {
+	defer wg.Done()
+	fmt.Println("Starting handlewithdrawals")
+
 	files, err := ioutil.ReadDir("deposits")
 	if err != nil {
 		log.Fatal(err)
